@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  connection: local
+
+  vars:
+    roles:
+      test:
+
+  tasks:
+
+  - name: Include variables from ~/.developer/dev-bootstrap/vars
+    include_vars:
+      dir: "{{ ansible_user_dir }}/.developer/dev-bootstrap/vars"
+
+  - name: Include all roles from inventory variables
+    include_role:
+      name: "{{ item.key }}"
+    loop: "{{ roles | dict2items }}"
+    when: roles
+

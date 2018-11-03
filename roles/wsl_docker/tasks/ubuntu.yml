@@ -1,0 +1,43 @@
+---
+# Outlined in the docker install guide:
+#   https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository
+
+- name: Install packages to allow apt to use a repository over HTTPS
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+  become: yes
+
+- name: Add Docker’s official GPG key
+  apt_key:
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  become: yes
+
+- apt_repository:
+    repo: >
+      deb [arch=amd64] https://download.docker.com/linux/ubuntu
+      {{ ansible_distribution_release }}
+      stable
+    state: present
+  become: yes
+
+- name: Install the latest version of Docker CE
+  apt:
+    name: docker-ce
+    update_cache: yes
+  become: yes
+
+- name: Configure docker client
+  copy:
+    dest: /etc/profile.d/docker.sh
+    content: export DOCKER_HOST=tcp://127.0.0.1:2375
+  become: yes
+

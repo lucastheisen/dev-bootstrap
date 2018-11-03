@@ -1,0 +1,6 @@
+# Vi
+*~
+.*.swp
+
+# Ansible
+*.retry

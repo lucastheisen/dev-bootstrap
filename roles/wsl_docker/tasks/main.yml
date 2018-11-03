@@ -1,0 +1,10 @@
+---
+- name: wsl_docker for ubuntu
+  include_tasks: ubuntu.yml
+  when: ansible_distribution == "Ubuntu"
+  register: wsl_docker_result
+
+- name: wsl_docker not supported for distribution
+  fail:
+    msg: "Unsupported distribution: {{ ansible_distribution }}"
+  when: wsl_docker_result is skipped
