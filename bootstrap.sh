@@ -1,5 +1,6 @@
 #!/bin/bash
 
-cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-pwd
-ansible-playbook update.yml
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
+
+git -C $HOME/.developer/dev-bootstrap/git pull
+$DIR/run_ansible.sh
