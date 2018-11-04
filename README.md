@@ -9,10 +9,10 @@ Invoke-WebRequest `
     -UseBasicParsing `
     | Invoke-Expression
 ```
-The first time it runs, you will be asked to provide your WSL username.  Each subsequent run will pull that answer from a cache file (`$env:USERPROFILE\\.developer\\dev-bootstrap\\Config.ps1`).
+The first time it runs, you will be asked to provide your WSL username.  Each subsequent run will pull that answer from a cache file (`$env:USERPROFILE\.developer\dev-bootstrap\Config.ps1`).
 
 ## Configuration
-This bootstrap is configured by providing one or more ansible `vars` files in the `$env:USERPROFILE\\.developer\\dev-bootstrap\\vars` directory.  The configuration is based on ansible roles.  The configuration root is a `roles` variable that is a `dict` whose keys are the names of roles to enable.  The values are configuration for the role itself.
+This bootstrap is configured by providing one or more ansible `vars` files in the `$env:USERPROFILE\.developer\dev-bootstrap\vars` directory.  The configuration is based on ansible roles.  The configuration root is a `roles` variable that is a `dict` whose keys are the names of roles to enable.  The values are configuration for the role itself.
 
 For example:
 ```
