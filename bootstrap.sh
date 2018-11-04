@@ -1,6 +1,5 @@
 #!/bin/bash
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-
-git -C $HOME/.developer/dev-bootstrap/git pull
-$DIR/run_ansible.sh
+GIT_DIR="$HOME/.developer/dev-bootstrap/git"
+git -C $GIT_DIR pull
+$GIT_DIR/run_ansible.sh
