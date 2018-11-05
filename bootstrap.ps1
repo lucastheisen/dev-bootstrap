@@ -44,6 +44,22 @@ if (-not $dotDeveloperLinked) {
     "`$dotDeveloperLinked = `$true" | Out-File $devBootstrapConfig -Append
 }
 
+if (-not $windowsAnsibleSetup) {
+    # https://docs.ansible.com/ansible/latest/user_guide/windows_setup.html#winrm-setup
+    $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
+    Invoke-WebRequest `
+        -Uri "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1" `
+        -UseBasicParsing `
+        -OutFile $file
+    Start-Process powershell.exe -Verb runas -ArgumentList "-ExecutionPolicy bypass -File $file" -ErrorAction Stop
+
+    ubuntu1804.exe run sudo apt-get update
+    ubuntu1804.exe run sudo apt-get -y install python-pip
+    ubuntu1804.exe run pip install "pywinrm>=0.3.0"
+
+    "`$windowsAnsibleSetup = `$true" | Out-File $devBootstrapConfig -Append
+}
+
 if (-not (Test-Path -Path $devBootstrapGit)) {
     ubuntu1804.exe run "git clone $gitRepoUrl $wslDotDeveloper/dev-bootstrap/git"
 }
