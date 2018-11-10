@@ -41,3 +41,11 @@
     content: export DOCKER_HOST=tcp://127.0.0.1:2375
   become: yes
 
+- name: Obtain docker-compose
+  get_url:
+    dest: /usr/local/bin/docker-compose
+    mode: 0755
+    url: "https://github.com/docker/compose/releases/download/{{ roles.wsl_docker.docker_compose.version | default('1.23.1', true) }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+    checksum: "sha256:https://github.com/docker/compose/releases/download/{{ roles.wsl_docker.docker_compose.version | default('1.23.1', true) }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}.sha256"
+  when: roles.wsl_docker.docker_compose is defined
+  become: yes
