@@ -1,9 +1,53 @@
+#Requires -RunAsAdministrator
+
 $gitRepoUrl = "https://github.com/lucastheisen/dev-bootstrap.git"
 $dotDeveloper = "$env:USERPROFILE\.developer"
 $devBootstrap = "$dotDeveloper\dev-bootstrap"
 $devBootstrapConfig = "$devBootstrap\Config.ps1"
 $devBootstrapGit = "$devBootstrap\git"
 $devBootstrapVars = "$devBootstrap\vars"
+
+function New-Password() {
+    param(
+        [int] $Length = 10,
+        [bool] $Upper = $true,
+        [bool] $Lower = $true,
+        [bool] $Numeric = $true,
+        [string] $Special
+    )
+
+    $upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    $lowerChars = "abcdefghijklmnopqrstuvwxyz"
+    $numericChars = "0123456789"
+
+    $all = ""
+    if ($Upper) { $all = "$all$upperChars" }
+    if ($Lower) { $all = "$all$lowerChars" }
+    if ($Numeric) { $all = "$all$numericChars" }
+    if ($Special -and ($special.Length -gt 0)) { $all = "$all$Special" }
+
+    $password = ""
+    for ($i = 0; $i -lt $Length; $i++) {
+        $password = $password + $all[$(Get-Random -Minimum 0 -Maximum $all.Length)]
+    }
+
+    $valid = $true
+    if ($Upper -and ($password.IndexOfAny($upperChars.ToCharArray()) -eq -1)) { $valid = $false }
+    if ($Lower -and ($password.IndexOfAny($lowerChars.ToCharArray()) -eq -1)) { $valid = $false }
+    if ($Numeric -and ($password.IndexOfAny($numericChars.ToCharArray()) -eq -1)) { $valid = $false }
+    if ($Special -and $Special.Length -gt 1 -and ($password.IndexOfAny($Special.ToCharArray()) -eq -1)) { $valid = $false }
+
+    if (-not $valid) {
+        $password = New-Password `
+            -Length $Length `
+            -Upper $Upper `
+            -Lower $Lower `
+            -Numeric $Numeric `
+            -Special $Special
+    }
+
+    return $password
+}
 
 New-Item -Path $devBootstrapVars -ItemType Directory -Force | Out-Null
 if (-not (Test-Path -Path $devBootstrapVars -PathType Container)) {
@@ -44,14 +88,42 @@ if (-not $dotDeveloperLinked) {
     "`$dotDeveloperLinked = `$true" | Out-File $devBootstrapConfig -Append
 }
 
+if (-not $winAnsibleAdministratorSetup) {
+    # https://stackoverflow.com/a/51889020/516433
+    $winAnsibleUsername = "ansible"
+    $winAnsiblePassword = New-Password -Length 30
+
+    # Set-Content writes BOM, so we use this:
+    #   https://stackoverflow.com/a/5596984/516433
+    $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+    [System.IO.File]::WriteAllLines("$devBootstrapVars\admin.yml", `
+        "---`nwin_ansible_username: `"$winAnsibleUsername`"`nwin_ansible_password: `"$winAnsiblePassword`"`n", `
+        $utf8NoBomEncoding)
+
+    $winAnsiblePasswordSecureString = ConvertTo-SecureString `
+        -AsPlainText "$winAnsiblePassword" `
+        -Force
+    New-LocalUser "$winAnsibleUsername" `
+        -Password $winAnsiblePasswordSecureString `
+        -FullName "$winAnsibleUsername" `
+        -Description "Local ansible admin $winAnsibleUsername" `
+        -ErrorAction Stop
+    Add-LocalGroupMember `
+        -Group "Administrators" `
+        -Member "$winAnsibleUsername" `
+        -ErrorAction Stop
+
+    "`$windowsAnsibleAdministratorSetup = `$true" | Out-File $devBootstrapConfig -Append
+}
+
 if (-not $windowsAnsibleSetup) {
     # https://docs.ansible.com/ansible/latest/user_guide/windows_setup.html#winrm-setup
     $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
     Invoke-WebRequest `
         -Uri "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1" `
         -UseBasicParsing `
-        -OutFile $file
-    Start-Process powershell.exe -Verb runas -ArgumentList "-ExecutionPolicy bypass -File $file" -ErrorAction Stop
+        -OutFile $file `
+        | Invoke-Expression
 
     ubuntu1804.exe run sudo apt-get update
     ubuntu1804.exe run sudo apt-get -y install python-pip

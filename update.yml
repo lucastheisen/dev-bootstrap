@@ -5,6 +5,12 @@
   vars:
     roles:
       test:
+    win_ansible_vars:
+      ansible_user: "{{ win_ansible_username }}"
+      ansible_password: "{{ win_ansible_password }}"
+      ansible_connection: winrm
+      ansible_winrm_transport: "{{ win_ansible_winrm_transport | default('basic') }}"
+      ansible_winrm_server_cert_validation: ignore
 
   tasks:
 

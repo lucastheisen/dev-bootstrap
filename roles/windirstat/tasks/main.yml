@@ -1,5 +1,5 @@
 ---
-- name: vscode for windows
+- name: WinDirStat for windows (duh!)
   include_tasks: windows.yml
   vars:
     ansible_user: "{{ win_ansible_vars.ansible_user }}"
@@ -7,5 +7,5 @@
     ansible_connection: "{{ win_ansible_vars.ansible_connection }}"
     ansible_winrm_transport: "{{ win_ansible_vars.ansible_winrm_transport }}"
     ansible_winrm_server_cert_validation: "{{ win_ansible_vars.ansible_winrm_server_cert_validation }}"
-  register: vscode_result
+  register: windirstat_result
 
