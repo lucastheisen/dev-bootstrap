@@ -2,7 +2,7 @@
 This is an WSL ansible based developer environment management project
 
 ## Get Started
-First thing you will need to do is run:
+First thing you will need to do is run this (from and Administrator powershell console):
 ```
 Invoke-WebRequest `
     -Uri https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/master/bootstrap.ps1 `

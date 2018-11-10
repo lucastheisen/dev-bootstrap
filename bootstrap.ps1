@@ -88,7 +88,7 @@ if (-not $dotDeveloperLinked) {
     "`$dotDeveloperLinked = `$true" | Out-File $devBootstrapConfig -Append
 }
 
-if (-not $winAnsibleAdministratorSetup) {
+if (-not $windowsAnsibleAdministratorSetup) {
     # https://stackoverflow.com/a/51889020/516433
     $winAnsibleUsername = "ansible"
     $winAnsiblePassword = New-Password -Length 30
