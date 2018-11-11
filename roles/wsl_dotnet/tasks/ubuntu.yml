@@ -1,0 +1,17 @@
+---
+# Outlined in the dotnet core sdk install guide:
+#   https://www.microsoft.com/net/download/linux-package-manager/ubuntu18-04/sdk-current
+
+- name: "Install packages-microsoft-prod.deb"
+  apt: 
+    deb: https://packages.microsoft.com/config/ubuntu/{{ ansible_distribution_version }}/packages-microsoft-prod.deb
+
+- name: "Install dotnet 2.1 package"
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+    - apt-transport-https
+    - dotnet-sdk-2.1
+  become: yes
