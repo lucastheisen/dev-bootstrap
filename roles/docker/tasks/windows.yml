@@ -1,0 +1,4 @@
+---
+- name: Install docker for windows
+  win_chocolatey:
+    name: docker-for-windows
