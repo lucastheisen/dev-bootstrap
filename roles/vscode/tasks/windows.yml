@@ -2,3 +2,5 @@
 - name: Install vscode
   win_chocolatey:
     name: vscode
+    state: "{{ roles.vscode.state | default(omit) }}"
+    version: "{{ roles.vscode.version | default(omit) }}"

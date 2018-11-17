@@ -2,3 +2,5 @@
 - name: Install docker for windows
   win_chocolatey:
     name: docker-for-windows
+    state: "{{ roles.docker.state | default(omit) }}"
+    version: "{{ roles.docker.version | default(omit) }}"
