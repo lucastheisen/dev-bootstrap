@@ -1,0 +1,48 @@
+---
+- name: Set wsl_golang_archive
+  set_fact:
+    wsl_golang_archive: "go{{ roles.wsl_golang.verision | default(wsl_golang_default_version) }}{{ wsl_golang_download_url_extension }}"
+
+- name: Set wsl_golang_download_url
+  set_fact:
+    wsl_golang_download_url: "{{ wsl_golang_download_url_base }}{{ wsl_golang_archive }}"
+
+- name: Ensure /opt/ansible/wsl_golang
+  file:
+    path: /opt/ansible/wsl_golang
+    state: directory
+    mode: 0700
+  become: yes
+
+- name: Download wsl_golang
+  get_url:
+    # Checksum isn't currently working:
+    #   https://github.com/ansible/ansible/issues/48847
+    #checksum: "{{ wsl_golang_download_url_checksum_algorithm }}:{{ wsl_golang_download_url }}.{{ wsl_golang_download_url_checksum_algorithm }}"
+    dest: "/opt/ansible/wsl_golang/{{ wsl_golang_archive }}"
+    url: "{{ wsl_golang_download_url }}"
+  become: yes
+  register: wsl_golang_download_result
+
+- name: install wsl_golang
+  block:
+
+  - name: Remove old version of wsl_golang
+    file:
+      path: /usr/local/go
+      state: absent
+
+  - name: Unarchive wsl_golang
+    unarchive:
+      dest: /usr/local
+      remote_src: yes
+      src: "/opt/ansible/wsl_golang/{{ wsl_golang_archive }}"
+
+  - name: Add go bin to path
+    copy:
+      content: "export PATH=$PATH:/usr/local/go/bin"
+      dest: /etc/profile.d/go.sh
+      mode: 0644
+
+  become: yes
+  when: wsl_golang_download_result.changed

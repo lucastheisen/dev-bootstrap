@@ -1,0 +1,20 @@
+---
+- name: install wsl_golang
+  block:
+
+  - name: Remove wsl_golang downloads
+    file:
+      path: /opt/ansible/wsl_golang
+      state: absent
+
+  - name: Remove wsl_golang
+    file:
+      path: /usr/local/go
+      state: absent
+
+  - name: Remove wsl_golang
+    file:
+      path: /etc/profile.d/go.sh
+      state: absent
+
+  become: yes

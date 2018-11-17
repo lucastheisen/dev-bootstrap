@@ -1,4 +1,7 @@
 ---
+# Approach based upon:
+#   https://golang.org/doc/install#tarball
+
 - name: Set wsl_golang_state
   set_fact:
     wsl_golang_state: "{{ roles.wsl_golang.state if roles is defined and roles.wsl_golang is defined and roles.wsl_golang.state is defined else 'present' }}"
