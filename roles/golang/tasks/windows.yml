@@ -1,0 +1,6 @@
+---
+- name: Install golang
+  win_chocolatey:
+    name: golang
+    state: "{{ roles.golang.state | default(omit) }}"
+    version: "{{ roles.golang.version | default(omit) }}"
