@@ -1,8 +1,8 @@
 # Developer Environment Bootstrapping
-This is an WSL ansible based developer environment management project
+Given that windows does not have a native ansible client, this bootstrap uses WSL Ansible.  The `bootstrap.ps1` does _just enough_ to get WSL and Ansible installed an configured before handing off management to Ansible.
 
 ## Get Started
-First thing you will need to do is run this (from and Administrator powershell console):
+To start, you will need to open a powershell console _as Administrator_.  The bootstrap script writes informationaly messages using `Write-Information`, so you will likely want to set `$InformationPreference = "Continue"`.  Now you will need run this script:
 ```
 Invoke-WebRequest `
     -Uri https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/master/bootstrap.ps1 `

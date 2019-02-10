@@ -49,6 +49,27 @@ function New-Password() {
     return $password
 }
 
+if ((Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux).State -ne "enabled") {
+    Write-Debug "Enabling WSL"
+    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+
+    Write-Information "Restart required.  Please restart, then run this script again"
+    exit
+}
+
+if (-not ((Get-AppxPackage -Name CanonicalGroupLimited.Ubuntu18.04onWindows).Status -eq "ok")) {
+    $ProgressPreference = "SilentlyContinue"
+    $ubuntuAppx = "$env:USERPROFILE\Downloads\ubuntu.appx"
+    Write-Information "Downloading ubuntu... This may take a while."
+    Invoke-WebRequest -Uri https://aka.ms/wsl-ubuntu-1804 -OutFile $ubuntuAppx -UseBasicParsing
+
+    Write-Information "Installing ubuntu application"
+    Add-AppxPackage -Path $ubuntuAppx
+
+    Write-Information "Installing ubuntu application"
+    ubuntu1804.exe install --root
+}
+
 New-Item -Path $devBootstrapVars -ItemType Directory -Force | Out-Null
 if (-not (Test-Path -Path $devBootstrapVars -PathType Container)) {
     Write-Error "$devBootstrapVars is not a directory" -ErrorAction Stop
@@ -58,12 +79,23 @@ if (Test-Path -Path $devBootstrapConfig) {
     . $devBootstrapConfig
 }
 else {
-    $wslUsername = Read-Host -Prompt 'What is your WSL username?'
+    $wslUsername = Read-Host -Prompt 'What is your WSL username (will be created if it does not exist)?'
     "`$wslUsername = `"$wslUsername`"" | Out-File $devBootstrapConfig -Append
 }
 $wslDotDeveloper = "/home/$wslUsername/.developer";
 
+Write-Information "wslUsername [$wslUsername]"
+Write-Information "in passwd   [$(ubuntu1804.exe run "cat /etc/passwd | grep $wslUsername")]"
+if (-not ((ubuntu1804.exe run "cat /etc/passwd | grep $wslUsername") -match "^$wslUsername`:")) {
+    Write-Information "$wslUsername does not exist...  Creating"
+    ubuntu1804.exe run "adduser $wslUsername"
+}
+
+Write-Information "Setting ubuntu default user to $wslUsername"
+ubuntu1804.exe config --default-user "$wslUsername"
+
 if (-not $sudoersConfigured) {
+    Write-Information "Add sudo ALL for $wslUsername"
     ubuntu1804.exe config --default-user root
     
     ubuntu1804.exe run "echo '$wslUsername ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/$wslUsername"
@@ -74,21 +106,25 @@ if (-not $sudoersConfigured) {
 }
 
 if (-not $dependenciesInstalled) {
+    Write-Information "Installing ansible dependencies"
     ubuntu1804.exe run sudo apt-get update
     ubuntu1804.exe run sudo apt-get install -y software-properties-common
     ubuntu1804.exe run sudo apt-add-repository -y ppa:ansible/ansible
     
+    Write-Information "Installing ansible"
     ubuntu1804.exe run sudo apt-get update
     ubuntu1804.exe run sudo apt-get -y install ansible git
     "`$dependenciesInstalled = `$true" | Out-File $devBootstrapConfig -Append
 }
 
 if (-not $dotDeveloperLinked) {
+    Write-Information "Linking ~/.developer"
     ubuntu1804.exe run "[ ! -e $wslDotDeveloper ] && ln -s `$(wslpath '$dotDeveloper') $wslDotDeveloper"
     "`$dotDeveloperLinked = `$true" | Out-File $devBootstrapConfig -Append
 }
 
 if (-not $windowsAnsibleAdministratorSetup) {
+    Write-Information "Creating ansible windows administrative user"
     # https://stackoverflow.com/a/51889020/516433
     $winAnsibleUsername = "ansible"
     $winAnsiblePassword = New-Password -Length 30
@@ -117,6 +153,7 @@ if (-not $windowsAnsibleAdministratorSetup) {
 }
 
 if (-not $windowsAnsibleSetup) {
+    Write-Information "Configuring windows for ansible"
     # https://docs.ansible.com/ansible/latest/user_guide/windows_setup.html#winrm-setup
     $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
     Invoke-WebRequest `
@@ -133,8 +170,13 @@ if (-not $windowsAnsibleSetup) {
 }
 
 if (-not (Test-Path -Path $devBootstrapGit)) {
+    Write-Information "Cloning dev-bootstrap"
     ubuntu1804.exe run "git clone $gitRepoUrl $wslDotDeveloper/dev-bootstrap/git"
 }
 
+Write-Information "Pulling latest changes to dev-bootstrap"
 ubuntu1804.exe run "git -C $wslDotDeveloper/dev-bootstrap/git pull"
+ubuntu1804.exe run "chmod 700 $wslDotDeveloper/dev-bootstrap/git/run_ansible.sh"
+
+Write-Information "Running dev-bootstrap ansible playbook"
 ubuntu1804.exe run "$wslDotDeveloper/dev-bootstrap/git/run_ansible.sh"
