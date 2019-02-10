@@ -5,6 +5,7 @@
 - name: "Install packages-microsoft-prod.deb"
   apt: 
     deb: https://packages.microsoft.com/config/ubuntu/{{ ansible_distribution_version }}/packages-microsoft-prod.deb
+  become: yes
 
 - name: "Install dotnet 2.1 package"
   apt:

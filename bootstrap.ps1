@@ -82,7 +82,7 @@ else {
     $wslUsername = Read-Host -Prompt 'What is your WSL username (will be created if it does not exist)?'
     "`$wslUsername = `"$wslUsername`"" | Out-File $devBootstrapConfig -Append
 }
-$wslDotDeveloper = "/home/$wslUsername/.developer";
+$wslDotDeveloper = "/home/$wslUsername/.developer"
 
 Write-Information "wslUsername [$wslUsername]"
 Write-Information "in passwd   [$(ubuntu1804.exe run "cat /etc/passwd | grep $wslUsername")]"
@@ -107,13 +107,13 @@ if (-not $sudoersConfigured) {
 
 if (-not $dependenciesInstalled) {
     Write-Information "Installing ansible dependencies"
-    ubuntu1804.exe run sudo apt-get update
-    ubuntu1804.exe run sudo apt-get install -y software-properties-common
-    ubuntu1804.exe run sudo apt-add-repository -y ppa:ansible/ansible
+    ubuntu1804.exe run "sudo apt-get update"
+    ubuntu1804.exe run "sudo apt-get install -y software-properties-common"
+    ubuntu1804.exe run "sudo apt-add-repository -y ppa:ansible/ansible"
     
     Write-Information "Installing ansible"
-    ubuntu1804.exe run sudo apt-get update
-    ubuntu1804.exe run sudo apt-get -y install ansible git
+    ubuntu1804.exe run "sudo apt-get update"
+    ubuntu1804.exe run "sudo apt-get -y install ansible git"
     "`$dependenciesInstalled = `$true" | Out-File $devBootstrapConfig -Append
 }
 
@@ -159,12 +159,13 @@ if (-not $windowsAnsibleSetup) {
     Invoke-WebRequest `
         -Uri "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1" `
         -UseBasicParsing `
-        -OutFile $file `
-        | Invoke-Expression
+        -OutFile $file
 
-    ubuntu1804.exe run sudo apt-get update
-    ubuntu1804.exe run sudo apt-get -y install python-pip
-    ubuntu1804.exe run pip install "pywinrm>=0.3.0"
+    powershell.exe -ExecutionPolicy ByPass -File $file
+
+    ubuntu1804.exe run "sudo apt-get update"
+    ubuntu1804.exe run "sudo apt-get -y install python-pip"
+    ubuntu1804.exe run "pip install 'pywinrm>=0.3.0'"
 
     "`$windowsAnsibleSetup = `$true" | Out-File $devBootstrapConfig -Append
 }
