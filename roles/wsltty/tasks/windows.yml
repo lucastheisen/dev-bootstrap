@@ -1,0 +1,18 @@
+---
+- name: Install wsltty
+  win_chocolatey:
+    name: wsltty
+    state: "{{ roles.wsltty.state | default(omit) }}"
+    version: "{{ roles.wsltty.version | default(omit) }}"
+
+- name: Generate wsltty shortcuts
+  win_shell: C:\ProgramData\chocolatey\lib\wsltty\tools\wslttyinstall\install.bat
+
+- name: Get APPDATA
+  win_shell: Write-Output $env:APPDATA
+  register: win_env_appdata
+
+- name: Copy wsltty config
+  win_copy:
+    src: config
+    dest: "{{ win_env_appdata.stdout | trim }}\\wsltty\\config"

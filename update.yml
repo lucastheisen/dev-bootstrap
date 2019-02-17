@@ -2,6 +2,13 @@
 - hosts: localhost
   connection: local
 
+  vars_prompt:
+  - name: win_ansible_username
+    prompt: Windows username
+    default: "{{ lookup('env', 'USER') }}"
+  - name: win_ansible_password
+    prompt: Windows password
+
   vars:
     roles:
       test:
