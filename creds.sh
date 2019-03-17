@@ -5,7 +5,7 @@ set -e
 readonly ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 readonly POWERSHELL_DIR="${ROOT_DIR}/vars_plugins/wincreds"
 # shellcheck disable=SC2016
-readonly WIN_PATH_CREDS_JSON='\$env:LOCALAPPDATA/pd-shell-bootstrap/creds.json'
+readonly WIN_PATH_CREDS_JSON='\$env:LOCALAPPDATA/dev-bootstrap/creds.json'
 readonly POWERSHELL='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
 
 function encode_command {
@@ -30,7 +30,11 @@ function powershell_command {
 }
 
 if ! creds="$(powershell_command GetCreds "s'{{CREDS_JSON}}'$WIN_PATH_CREDS_JSON'")"; then
-  username="$(whoami)"
+  read -rp "Enter your windows username ($(whoami)): " username
+  if [[ -z "$username" ]]; then
+    username="$(whoami)"
+  fi
+
   read -rsp "Enter your windows password: " password
   >&2 echo
 

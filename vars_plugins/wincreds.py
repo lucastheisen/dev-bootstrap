@@ -41,8 +41,10 @@ def load_creds(loader):
         save_creds(loader)
 
 def save_creds(loader):
+    default_user = getuser()
+    user = raw_input('Windows username (%s):' % (default_user)).strip()
     WINCREDS['wincreds'] = {
-        'username': getuser(),
+        'username': user if user else default_user,
         'password': getpass('Windows password:')
     }
 
@@ -63,7 +65,7 @@ def save_creds(loader):
 
     try:
         with open('/dev/null') as f:
-            res = subprocess.check_output(
+            subprocess.check_output(
                 [POWERSHELL, '-NonInteractive', '-NoProfile', '-EncodedCommand', encoded_command],
                 stdin=sys.stdin,
                 stderr=f)

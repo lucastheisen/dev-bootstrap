@@ -27,13 +27,16 @@ if (-not $?) {
     Write-Error "Invalid creds.json" -ErrorAction Stop
 }
 
+Write-Debug "Username: $($creds.GetNetworkCredential().UserName)"
+Write-Debug "Password: $($creds.GetNetworkCredential().Password)"
+
 Add-Type -AssemblyName System.DirectoryServices.AccountManagement
 
 $valid = $false
 try {
     $ds = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Domain) `
         -ErrorAction "Continue"
-    if ($ds.ValidateCredentials($creds.GetNetworkCredential().UserName, $creds.GetNetworkCredential().password)) {
+    if ($ds.ValidateCredentials($creds.GetNetworkCredential().UserName, $creds.GetNetworkCredential().Password)) {
         $valid = $true
     }
 }
@@ -42,18 +45,20 @@ catch {
 }
 
 $ds = New-Object System.DirectoryServices.AccountManagement.PrincipalContext([System.DirectoryServices.AccountManagement.ContextType]::Machine)
-if ($ds.ValidateCredentials($creds.GetNetworkCredential().UserName, $creds.GetNetworkCredential().password)) {
+Write-Debug "Testing machine"
+if ($ds.ValidateCredentials($creds.GetNetworkCredential().UserName, $creds.GetNetworkCredential().Password)) {
+    Write-Debug "Testing machine: SUCCESS"
     $valid = $true
 }
+Write-Debug "Testing machine finished"
 
 if ($valid) {
-    Select-Object -InputObject $creds Username,@{Name="Password";Expression = {$_.Password | ConvertFrom-SecureString}} `
+    Select-Object -InputObject $creds UserName,@{Name="Password";Expression = {$_.Password | ConvertFrom-SecureString}} `
         | ConvertTo-Json `
         | Out-File $credsJsonPath
-    ConvertTo-Json @{Username = $creds.Username; Password = $creds.GetNetworkCredential().Password} `
+    ConvertTo-Json @{UserName = $creds.GetNetworkCredential().UserName; Password = $creds.GetNetworkCredential().Password} `
         | Write-Output
 }
 else {
     Write-Error "Bad credentials" -ErrorAction Stop
 }
-
