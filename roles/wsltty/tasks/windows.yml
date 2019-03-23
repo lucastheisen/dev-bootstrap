@@ -6,11 +6,15 @@
     version: "{{ roles.wsltty.version | default(omit) }}"
 
 - name: Generate wsltty shortcuts
-  win_shell: C:\ProgramData\chocolatey\lib\wsltty\tools\wslttyinstall\install.bat
+  win_shell: .\install.bat
+  args:
+    chdir: C:\ProgramData\chocolatey\lib\wsltty\tools\wslttyinstall 
+    executable: cmd
 
 - name: Get APPDATA
   win_shell: Write-Output $env:APPDATA
   register: win_env_appdata
+  changed_when: false
 
 - name: Copy wsltty config
   win_copy:

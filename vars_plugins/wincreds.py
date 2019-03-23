@@ -10,7 +10,7 @@ import sys
 
 WINCREDS = {}
 CREDS_JSON = '$env:LOCALAPPDATA/dev-bootstrap/creds.json'
-POWERSHELL = '/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
+POWERSHELL = 'powershell.exe'
 
 def load_creds(loader):
     get_creds_file = os.path.join(

@@ -1,6 +1,7 @@
 #Requires -RunAsAdministrator
 
-if ((Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux).State -ne "enabled") {
+Write-Debug "Check for WSL"
+if ((Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux).State -ne "Enabled") {
     Write-Debug "Enabling WSL"
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 
@@ -8,7 +9,8 @@ if ((Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem
     exit
 }
 
-if (-not ((Get-AppxPackage -Name CanonicalGroupLimited.Ubuntu18.04onWindows).Status -eq "ok")) {
+Write-Debug "Check for Ubuntu18"
+if (((Get-AppxPackage -Name CanonicalGroupLimited.Ubuntu18.04onWindows).Status -ne "Ok")) {
     $ProgressPreference = "SilentlyContinue"
     $ubuntuAppx = "$env:USERPROFILE\Downloads\ubuntu.appx"
     Write-Information "Downloading ubuntu... This may take a while."
@@ -21,6 +23,7 @@ if (-not ((Get-AppxPackage -Name CanonicalGroupLimited.Ubuntu18.04onWindows).Sta
     ubuntu1804.exe install --root
 }
 
+Write-Debug "Check if Ubuntu18 needs initialization"
 if ($(ubuntu1804.exe run whoami) -eq "root") {
     $wslUsername = Read-Host -Prompt 'What is your WSL username (will be created if it does not exist)?'
 
@@ -40,7 +43,7 @@ if ($(ubuntu1804.exe run whoami) -eq "root") {
 
 Write-Information "Configuring windows for ansible"
 # https://docs.ansible.com/ansible/latest/user_guide/windows_setup.html#winrm-setup
-$file = "$env:temp\ConfigureRemotingForAnsible.ps1"
+$file = "$env:TEMP\ConfigureRemotingForAnsible.ps1"
 Invoke-WebRequest `
     -Uri "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1" `
     -UseBasicParsing `
