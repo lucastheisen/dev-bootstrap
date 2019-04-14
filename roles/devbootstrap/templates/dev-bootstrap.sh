@@ -5,6 +5,6 @@ fi
 
 export TERM=xterm-256color
 
-alias dev-bootstrap='python ${DEV_BOOTSTRAP_GIT:-{{ dev_bootstrap.install_dir }}/git/dev-bootstrap}/devbootstrap/devbootstrap.py'
+alias dev-bootstrap='python ${DEV_BOOTSTRAP_GIT:-{{ dev_bootstrap.install_dir }}/git}/devbootstrap/devbootstrap.py'
 
 set -o vi
