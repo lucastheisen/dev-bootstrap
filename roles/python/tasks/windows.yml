@@ -1,0 +1,6 @@
+---
+- name: Install python
+  win_chocolatey:
+    name: python
+    state: "{{ roles.python.state | default(omit) }}"
+    version: "{{ roles.python.version | default(omit) }}"

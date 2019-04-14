@@ -4,8 +4,8 @@
 
 - name: Install packages to allow apt to use a repository over HTTPS
   apt:
+    cache_valid_time: 600
     name: "{{ packages }}"
-    update_cache: yes
   vars:
     packages:
     - apt-transport-https
@@ -21,18 +21,26 @@
     state: present
   become: yes
 
-- apt_repository:
+- name: Add Docker's official apt repository
+  apt_repository:
     repo: >
       deb [arch=amd64] https://download.docker.com/linux/ubuntu
       {{ ansible_distribution_release }}
       stable
     state: present
   become: yes
+  register: roles_wsl_docker_add_apt_repo
+
+- name: Update apt cache after adding docker apt repository
+  apt:
+    update_cache: yes
+  become: yes
+  when: roles_wsl_docker_add_apt_repo.changed
 
 - name: Install the latest version of Docker CE
   apt:
+    cache_valid_time: 600
     name: docker-ce
-    update_cache: yes
   become: yes
 
 - name: Configure docker client

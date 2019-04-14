@@ -1,0 +1,40 @@
+---
+- name: Install vim package
+  apt:
+    cache_valid_time: 600
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - vim
+  become: yes
+
+- name: Ensure vim autoload folder exists
+  file:
+    path: "{{ ansible_env['HOME'] }}/.vim/autoload"
+    state: directory
+
+- name: Install vimplug
+  get_url:
+    dest: "{{ ansible_env['HOME'] }}/.vim/autoload/plug.vim"
+    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+- name: Fetch custom vimrc
+  get_url:
+    dest: "{{ ansible_env['HOME'] }}/.vimrc"
+    force: yes
+    url: "{{ roles.wsl_vim.vimrc_url }}"
+  when: roles.wsl_vim and roles.wsl_vim.vimrc_url
+  register: role_wsl_vim_fetch_vimrc_result
+  
+- name: Copy vimrc
+  copy:
+    src: .vimrc
+    dest: "{{ ansible_env['HOME'] }}/.vimrc"
+  when: (not roles.wsl_vim) or (not roles.wsl_vim.vimrc_url)
+  register: role_wsl_vim_copy_vimrc_result
+
+# Imspired by this issue: https://github.com/junegunn/vim-plug/issues/730
+- name: Install vim plugins
+  shell: |
+    vim +'PlugInstall --sync' +qall &> /dev/null < /dev/tty
+  when: role_wsl_vim_fetch_vimrc_result.changed or role_wsl_vim_copy_vimrc_result.changed

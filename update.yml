@@ -17,4 +17,3 @@
       name: "{{ item.key }}"
     loop: "{{ roles | dict2items }}"
     when: roles
-

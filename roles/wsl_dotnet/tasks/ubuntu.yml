@@ -6,11 +6,18 @@
   apt: 
     deb: https://packages.microsoft.com/config/ubuntu/{{ ansible_distribution_version }}/packages-microsoft-prod.deb
   become: yes
+  register: roles_wsl_dotnet_add_apt_repo
+
+- name: Update apt cache after adding dotnet apt repository
+  apt:
+    update_cache: yes
+  become: yes
+  when: roles_wsl_dotnet_add_apt_repo.changed
 
 - name: "Install dotnet 2.1 package"
   apt:
+    cache_valid_time: 600
     name: "{{ packages }}"
-    update_cache: yes
   vars:
     packages:
     - apt-transport-https

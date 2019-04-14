@@ -29,7 +29,6 @@ fi
 echo -e "\n\nCheckout branch ${GIT_BRANCH}"
 git -C "${GIT_DIR}" checkout "${GIT_BRANCH}" --force
 
-exit 
 echo -e "\n\nRun ansible"
 chmod 700 "${GIT_DIR}/run_ansible.sh"
 exec "${GIT_DIR}/run_ansible.sh" "$@"
