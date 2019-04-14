@@ -5,24 +5,37 @@ import subprocess
 import tempfile
 import yaml
 
-def _config_file():
-    returncode, localappdata, err = _run_command([
-        'powershell.exe',
-        '-NoProfile',
-        'Write-Output',
-        '$env:LOCALAPPDATA',
-    ])
-    if (returncode):
-        raise Exception("Failed to resolve config file: %s" % (err))
+"""
+Manages devbootstrap configuration.
+"""
 
-    returncode, config_file, err = _run_command([
-        'wslpath',
-        ('%s/dev-bootstrap/config.yml' % (localappdata)),
-    ])
-    if (returncode):
-        raise Exception("Failed to convert path to WSL: %s" % (err))
+def _config_file():
+    if os.name == 'nt':
+        config_file = os.path.join(os.environ['LOCALAPPDATA'], 'dev-bootstrap', 'config.yml')
+    else: 
+        returncode, localappdata, err = _run_command([
+            'powershell.exe',
+            '-NoProfile',
+            'Write-Output',
+            '$env:LOCALAPPDATA',
+        ])
+        if (returncode):
+            raise Exception("Failed to resolve config file: %s" % (err))
+
+        returncode, config_file, err = _run_command([
+            'wslpath',
+            ('%s/dev-bootstrap/config.yml' % (localappdata)),
+        ])
+        if (returncode):
+            raise Exception("Failed to convert path to WSL: %s" % (err))
 
     return config_file
+
+def _default_editor():
+    if os.name == 'nt':
+        return 'code.cmd -w'
+    else: 
+        return 'vi'
 
 def _dump(config):
     return yaml.dump(config, default_flow_style=False, indent=2)
@@ -39,7 +52,7 @@ def edit(args):
 
         _save(config, temp_file)
 
-        env_editor = os.environ.get('EDITOR', 'vi')
+        env_editor = os.environ.get('EDITOR', _default_editor())
         command = shlex.split(env_editor)
         command.append(temp_file)
         subprocess.call(command)
@@ -52,7 +65,7 @@ def edit(args):
 
 def _load(file):
     with open(file, 'r') as f:
-        return yaml.load(f.read())
+        return yaml.load(f.read(), Loader=yaml.SafeLoader)
 
 def _run_command(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -71,7 +84,7 @@ def set_value(args):
         else:
             config[branch_name] = {}
 
-    value = yaml.load(args.value)
+    value = yaml.load(args.value, Loader=yaml.SafeLoader)
     if value is None:
         del(config[name_parts[-1]])
     else:

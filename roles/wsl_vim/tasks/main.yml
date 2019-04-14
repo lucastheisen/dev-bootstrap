@@ -1,0 +1,11 @@
+---
+- name: wsl_vim for ubuntu
+  include_tasks: ubuntu.yml
+  when: ansible_distribution == "Ubuntu"
+  register: wsl_vim_result
+
+- name: wsl_vim not supported for distribution
+  fail:
+    msg: "Unsupported distribution: {{ ansible_distribution }}"
+  when: wsl_vim_result is skipped
+

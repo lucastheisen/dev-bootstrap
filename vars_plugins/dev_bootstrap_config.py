@@ -34,13 +34,21 @@ class VarsModule(BaseVarsPlugin):
             self._display.warning("Failed to resolve config file: %s" % (err))
             return CACHE['config']
 
-        returncode, config_file, err = run_command([
+        returncode, dev_bootstrap_install_dir, err = run_command([
             'wslpath',
-            ('%s/dev-bootstrap/config.yml' % (localappdata)),
+            ('%s/dev-bootstrap' % (localappdata)),
         ])
         if (returncode):
             self._display.warning("Failed to convert path to WSL: %s" % (err))
             return CACHE['config']
+
+        config_file = os.path.join(dev_bootstrap_install_dir, 'config.yml')
+        CACHE['config'] = dict(
+            dev_bootstrap=dict(
+                install_dir=dev_bootstrap_install_dir,
+                config_file=config_file,
+            ),
+        )
 
         if 'DEV_BOOTSTRAP_CONFIG' in os.environ:
             display.vvvv('Writing %s from env var DEV_BOOTSTRAP_CONFIG\n%s' % (config_file, os.environ['DEV_BOOTSTRAP_CONFIG']))
@@ -49,12 +57,12 @@ class VarsModule(BaseVarsPlugin):
 
         if os.path.exists(config_file):
             display.vvvv('Found %s' % (config_file))
-            CACHE['config'] = loader.load_from_file(config_file, cache=True, unsafe=True)
+            CACHE['config'].update(loader.load_from_file(config_file, cache=True, unsafe=False))
         else:
-            default_config = 'roles:\n  test:\n    a: b'
+            default_config = 'roles:\n  devbootstrap:'
             display.vvvv('Writing default %s\n%s' % (config_file, default_config))
             with open(config_file, 'wb') as f:
                 f.write(default_config)
-            CACHE['config'] = loader.load_from_file(config_file, cache=True, unsafe=True)
+            CACHE['config'].update(loader.load_from_file(config_file, cache=True, unsafe=False))
 
         return CACHE['config']

@@ -1,0 +1,6 @@
+---
+- name: Add /etc/profile.d/dev-bootstrap.sh
+  template:
+    src: dev-bootstrap.sh
+    dest: /etc/profile.d/dev-bootstrap.sh
+  become: yes
