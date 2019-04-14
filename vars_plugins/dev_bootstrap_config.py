@@ -2,6 +2,12 @@ from ansible.plugins.vars import BaseVarsPlugin
 import os
 import subprocess
 
+try:
+    from __main__ import display
+except ImportError:
+    from ansible.utils.display import Display
+    display = Display()
+
 CACHE = {}
 
 def run_command(args):
@@ -37,10 +43,18 @@ class VarsModule(BaseVarsPlugin):
             return CACHE['config']
 
         if 'DEV_BOOTSTRAP_CONFIG' in os.environ:
+            display.vvvv('Writing %s from env var DEV_BOOTSTRAP_CONFIG\n%s' % (config_file, os.environ['DEV_BOOTSTRAP_CONFIG']))
             with open(config_file, 'wb') as f:
                 f.write(os.environ['DEV_BOOTSTRAP_CONFIG'])
 
         if os.path.exists(config_file):
+            display.vvvv('Found %s' % (config_file))
+            CACHE['config'] = loader.load_from_file(config_file, cache=True, unsafe=True)
+        else:
+            default_config = 'roles:\n  test:\n    a: b'
+            display.vvvv('Writing default %s\n%s' % (config_file, default_config))
+            with open(config_file, 'wb') as f:
+                f.write(default_config)
             CACHE['config'] = loader.load_from_file(config_file, cache=True, unsafe=True)
 
         return CACHE['config']
