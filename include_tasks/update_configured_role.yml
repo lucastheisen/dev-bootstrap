@@ -1,0 +1,24 @@
+---
+- name: set up dynamic external
+  block:
+
+  - name: set dynamic external symlink for {{ configured_role.name }}
+    file:
+      src: "{{ configured_role.config.dev_bootstrap_dynamic_external }}"
+      dest: .dynamic-external
+      state: link
+    when: configured_role.config.dev_bootstrap_dynamic_external is defined
+    changed_when: False
+  
+  - name: include configured role {{ configured_role.name }}
+    include_role:
+      name: "{{ configured_role.name }}"
+
+  always:
+
+  - name: remove dynamic external symlink for {{ configured_role.name }}
+    file:
+      dest: .dynamic-external
+      state: absent
+    when: configured_role.config.dev_bootstrap_dynamic_external is defined
+    changed_when: False
