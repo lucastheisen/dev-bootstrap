@@ -1,0 +1,7 @@
+---
+- name: adding install role {{role_key}}
+  set_fact:
+    configured_roles: "{{ configured_roles | default({}) | combine({role_key: role_value}) }}"
+  vars:
+    role_key: "{{ repo_role.key }}"
+    role_value: "{{ repo_role.value | default({}) | combine({'dev_bootstrap_dynamic_external': repo_dir}) }}"

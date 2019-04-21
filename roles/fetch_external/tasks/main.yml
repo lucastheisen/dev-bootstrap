@@ -1,0 +1,16 @@
+---
+- block:
+  - name: fetch git repo {{ repo.uri }}
+    git:
+      dest: "{{ repo_dir }}"
+      repo: "{{ repo.uri }}"
+      version: "{{ repo.ref | default('master') }}"
+
+  - name: add install roles for {{ repo.uri }}
+    include_tasks: add_configured_role.yml
+    loop: "{{ repo.roles | dict2items }}"
+    loop_control:
+      loop_var: repo_role
+
+  vars: 
+    repo_dir: "{{ dev_bootstrap.install_dir }}/external_repos/{{ repo.uri | to_folder_name }}"

@@ -5,3 +5,6 @@
 # Ansible
 *.retry
 *.pyc
+
+# dev-bootstrap
+.dynamic-external
