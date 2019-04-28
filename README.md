@@ -60,7 +60,7 @@ dev-bootstrap update
 However, you can also:
 
 ### From powershell
-Just re-run the same command as Get Started.
+Just re-run the same command as [Get Started](#get-started).
 
 ### From bash
 From a bash shell, run:
