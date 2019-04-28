@@ -41,8 +41,13 @@ def _dump(config):
     return yaml.dump(config, default_flow_style=False, indent=2)
 
 def edit(args):
-    # inspired by ansible vault edit:
-    #   https://github.com/ansible/ansible/blob/5c992fcc3f911d52c9c5512c178bc27e0236e30f/lib/ansible/parsing/vault/__init__.py#L845-L880
+    """
+    Opens the config file in an editor.  Will check $EDITOR first, and if not
+    specified fall back to `code.cmd -w` for windows, `vi` otherwise.
+
+    This approach is inspired by 
+    `ansible vault edit <https://github.com/ansible/ansible/blob/5c992fcc3f911d52c9c5512c178bc27e0236e30f/lib/ansible/parsing/vault/__init__.py#L845-L880>`.
+    """
     config_file = _config_file()
 
     config = _load(config_file)
@@ -73,6 +78,13 @@ def _run_command(args):
     return proc.returncode, (out.rstrip() if out else None), (err.rstrip() if out else None)
 
 def set_value(args):
+    """
+    Sets a single value in config file.
+
+    :param args: An object representing command line params, will have
+        `name` - The key, `.` separated segments (ex: `roles.test.a`).
+        `value` - The value.
+    """
     config_file = _config_file()
     full_config = _load(config_file)
     name_parts = args.name.split('.')
@@ -97,4 +109,7 @@ def _save(config, file):
         f.write(_dump(config))
 
 def view(args):
+    """
+    Prints out the config file.
+    """
     print(_dump(_load(_config_file())))

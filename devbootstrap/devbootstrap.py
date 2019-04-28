@@ -1,7 +1,8 @@
 import argparse
+import config
 from functools import reduce
 import sys
-import config
+import update
 
 command_config_edit = dict(
     description='open the current configuration in an editor',
@@ -35,6 +36,7 @@ command_config = dict(
 
 command_update = dict(
     description='runs bootstrap update',
+    function=update.update,
     name='update')
 
 command_main = dict(
