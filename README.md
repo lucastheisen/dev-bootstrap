@@ -52,8 +52,12 @@ roles:
     role_weight: 1
 ```
 
-## Refresh
-As configuration changes, you will need to re-run the bootstrap.  You can do so from powershell or bash.
+## Update
+As configuration changes, you will need to re-run the bootstrap.  The primary approach to updating is to simply use:
+```
+dev-bootstrap update
+```
+However, you can also:
 
 ### From powershell
 Just re-run the same command as Get Started.
