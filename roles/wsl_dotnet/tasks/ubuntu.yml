@@ -14,12 +14,12 @@
   become: yes
   when: roles_wsl_dotnet_add_apt_repo.changed
 
-- name: "Install dotnet 2.1 package"
+- name: "Install dotnet 3.0 package"
   apt:
     cache_valid_time: 600
     name: "{{ packages }}"
   vars:
     packages:
     - apt-transport-https
-    - dotnet-sdk-2.1
+    - dotnet-sdk-3.0
   become: yes
