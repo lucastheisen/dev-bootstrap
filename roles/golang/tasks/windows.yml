@@ -3,4 +3,5 @@
   win_chocolatey:
     name: golang
     state: "{{ roles.golang.state | default(omit) }}"
-    version: "{{ roles.golang.version | default(omit) }}"
+    version: "{{ roles.golang.version | default(golang_default_version) }}"
+
