@@ -1,0 +1,10 @@
+---
+- name: wsl_node for ubuntu
+  include_tasks: ubuntu.yml
+  when: ansible_distribution == "Ubuntu"
+  register: wsl_node_result
+
+- name: wsl_node not supported for distribution
+  fail:
+    msg: "Unsupported distribution: {{ ansible_distribution }}"
+  when: wsl_node_result is skipped

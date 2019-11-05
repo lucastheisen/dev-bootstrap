@@ -1,0 +1,31 @@
+---
+# Outlined in the nodesource install guide:
+#   https://github.com/nodesource/distributions/blob/master/README.md#manual-installation
+
+- name: Install nodesource signing key
+  apt_key:
+    url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+  become: yes
+
+- name: Install nodesource
+  apt_repository: 
+    repo: deb [arch=amd64] {{ roles_wsl_nodejs_defaults_repo_url }} {{ ansible_distribution_release }} main
+  become: yes
+  register: roles_wsl_nodejs_add_apt_repo
+
+- name: Update apt cache after adding dotnet apt repository
+  apt:
+    update_cache: yes
+  become: yes
+  when: roles_wsl_nodejs_add_apt_repo.changed
+
+- name: Install nodejs {{ roles_wsl_nodejs_defaults_install_version }} package
+  apt:
+    cache_valid_time: 600
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - apt-transport-https
+    - nodejs={{ roles_wsl_nodejs_defaults_install_version }}
+  become: yes
+

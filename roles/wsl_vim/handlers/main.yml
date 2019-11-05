@@ -1,0 +1,6 @@
+# Imspired by this issue: https://github.com/junegunn/vim-plug/issues/730
+- name: Install vim plugins
+  listen: "install vim plugins"
+  shell: |
+    vim +'PlugInstall --sync' +qall &> /dev/null < /dev/tty
+  when: role_wsl_vim_fetch_vimrc_result.changed or role_wsl_vim_copy_vimrc_result.changed

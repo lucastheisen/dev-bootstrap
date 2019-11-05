@@ -18,23 +18,26 @@
     dest: "{{ ansible_env['HOME'] }}/.vim/autoload/plug.vim"
     url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-- name: Fetch custom vimrc
-  get_url:
-    dest: "{{ ansible_env['HOME'] }}/.vimrc"
-    force: yes
-    url: "{{ roles.wsl_vim.vimrc_url }}"
-  when: roles.wsl_vim and roles.wsl_vim.vimrc_url
-  register: role_wsl_vim_fetch_vimrc_result
-  
-- name: Copy vimrc
-  copy:
-    src: .vimrc
-    dest: "{{ ansible_env['HOME'] }}/.vimrc"
-  when: (not roles.wsl_vim) or (not roles.wsl_vim.vimrc_url)
-  register: role_wsl_vim_copy_vimrc_result
+- name: Non-local vimrc
+  block:
 
-# Imspired by this issue: https://github.com/junegunn/vim-plug/issues/730
-- name: Install vim plugins
-  shell: |
-    vim +'PlugInstall --sync' +qall &> /dev/null < /dev/tty
-  when: role_wsl_vim_fetch_vimrc_result.changed or role_wsl_vim_copy_vimrc_result.changed
+  - name: Fetch custom vimrc
+    get_url:
+      dest: "{{ ansible_env['HOME'] }}/.vimrc"
+      force: yes
+      url: "{{ roles.wsl_vim.vimrc_url }}"
+    when:
+    - roles.wsl_vim.vimrc_url is defined
+    notify: "install vim plugins"
+
+  - name: Copy vimrc
+    copy:
+      src: .vimrc
+      dest: "{{ ansible_env['HOME'] }}/.vimrc"
+    when:
+    - roles.wsl_vim.vimrc_url is not defined
+    notify: "install vim plugins"
+
+  when:
+  - (roles.wsl_vim.vimrc_local is not defined) or (not roles.wsl_vim.vimrc_local)
+
