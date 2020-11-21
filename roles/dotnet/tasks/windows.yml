@@ -1,7 +1,7 @@
 ---
 - name: Install dotnet for windows
   win_chocolatey:
-    allow_pre_release: "{{ roles.dotnet.allow_pre_release | default(omit) }}"
+    allow_prerelease: "{{ roles.dotnet.allow_prerelease | default(omit) }}"
     name: dotnetcore-sdk
     state: "{{ roles.dotnet.state | default(omit) }}"
     version: "{{ roles.dotnet.version | default(omit) }}"

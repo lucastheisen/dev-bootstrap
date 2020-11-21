@@ -1,0 +1,8 @@
+---
+- name: Install windows terminal
+  win_chocolatey:
+    allow_prerelease: "{{ roles.windows_terminal.allow_prerelease | default(true) }}"
+    force: yes
+    name: microsoft-windows-terminal
+    state: "{{ roles.windows_terminal.state | default('latest') }}"
+    version: "{{ roles.windows_terminal.version | default(omit) }}"
