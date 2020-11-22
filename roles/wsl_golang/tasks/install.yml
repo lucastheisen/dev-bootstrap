@@ -1,7 +1,7 @@
 ---
 - name: Set wsl_golang_archive
   set_fact:
-    wsl_golang_archive: "go{{ roles.wsl_golang.verision | default(wsl_golang_default_version) }}{{ wsl_golang_download_url_extension }}"
+    wsl_golang_archive: "go{{ roles.wsl_golang.version | default(wsl_golang_default_version) }}{{ wsl_golang_download_url_extension }}"
 
 - name: Set wsl_golang_download_url
   set_fact:
@@ -16,9 +16,6 @@
 
 - name: Download wsl_golang
   get_url:
-    # Checksum isn't currently working:
-    #   https://github.com/ansible/ansible/issues/48847
-    #checksum: "{{ wsl_golang_download_url_checksum_algorithm }}:{{ wsl_golang_download_url }}.{{ wsl_golang_download_url_checksum_algorithm }}"
     dest: "/opt/ansible/wsl_golang/{{ wsl_golang_archive }}"
     url: "{{ wsl_golang_download_url }}"
   become: yes

@@ -1,5 +1,5 @@
 ---
-wsl_golang_default_version: 1.13.3
+wsl_golang_default_version: 1.15.5
 wsl_golang_download_url_base: "https://dl.google.com/go/"
 wsl_golang_download_url_extension: ".linux-amd64.tar.gz"
 wsl_golang_download_url_checksum_algorithm: sha256
