@@ -1,7 +1,19 @@
 ---
-- name: Install dotnet for windows
+- name: Install dotnet <5 for windows
   win_chocolatey:
     allow_prerelease: "{{ roles.dotnet.allow_prerelease | default(omit) }}"
     name: dotnetcore-sdk
     state: "{{ roles.dotnet.state | default(omit) }}"
     version: "{{ roles.dotnet.version | default(omit) }}"
+  when:
+  - roles.dotnet.version is defined
+  - roles.dotnet.version is version('5.0.0', operator='lt', strict=True) }
+
+- name: Install dotnet >=5 for windows
+  win_chocolatey:
+    allow_prerelease: "{{ roles.dotnet.allow_prerelease | default(omit) }}"
+    name: dotnet-sdk
+    state: "{{ roles.dotnet.state | default(omit) }}"
+    version: "{{ roles.dotnet.version | default(omit) }}"
+  when: (roles.dotnet.version is not defined)
+    or (roles.dotnet.version is version('5.0.0', operator='ge', strict=True))

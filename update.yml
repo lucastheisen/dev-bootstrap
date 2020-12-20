@@ -15,6 +15,8 @@
   - name: set configured roles empty
     set_fact:
       configured_roles: "{{ roles | default({}) }}"
+    tags:
+    - always
 
   - name: fetch external configured roles
     include_role:
@@ -22,6 +24,8 @@
     loop: "{{ external.repos }}"
     loop_control:
       loop_var: repo
+    tags:
+    - always
     when:
     - external is defined
     - external.repos is defined
@@ -29,9 +33,13 @@
   - name: configured roles
     debug:
       var: configured_roles
+    tags:
+    - always
 
   - name: include all configured roles
     include_tasks: include_tasks/update_configured_role.yml
     loop: "{{ configured_roles | by_role_weight }}"
     loop_control:
       loop_var: configured_role
+    tags:
+    - always

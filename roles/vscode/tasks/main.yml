@@ -8,4 +8,3 @@
     ansible_winrm_transport: "{{ win_ansible_vars.ansible_winrm_transport }}"
     ansible_winrm_server_cert_validation: "{{ win_ansible_vars.ansible_winrm_server_cert_validation }}"
   register: vscode_result
-

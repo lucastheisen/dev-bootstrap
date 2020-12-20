@@ -1,10 +1,16 @@
 ---
-- name: wsl_dotnet for ubuntu
-  include_tasks: ubuntu.yml
-  when: ansible_distribution == "Ubuntu"
-  register: wsl_dotnet_result
+- block:
 
-- name: wsl_dotnet not supported for distribution
-  fail:
-    msg: "Unsupported distribution: {{ ansible_distribution }}"
-  when: wsl_dotnet_result is skipped
+  - name: wsl_dotnet for ubuntu
+    include_tasks: ubuntu.yml
+    when: ansible_distribution == "Ubuntu"
+    register: wsl_dotnet_result
+  
+  - name: wsl_dotnet not supported for distribution
+    fail:
+      msg: "Unsupported distribution: {{ ansible_distribution }}"
+    when: wsl_dotnet_result is skipped
+
+  tags:
+  - ubuntu
+  - dotnet
