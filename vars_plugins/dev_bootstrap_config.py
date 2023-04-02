@@ -42,7 +42,7 @@ class VarsModule(BaseVarsPlugin):
             self._display.warning("Failed to convert path to WSL: %s" % (err))
             return CACHE['config']
 
-        config_file = os.path.join(dev_bootstrap_install_dir, 'config.yml')
+        config_file = os.path.join(dev_bootstrap_install_dir, b'config.yml')
         CACHE['config'] = dict(
             dev_bootstrap=dict(
                 install_dir=dev_bootstrap_install_dir,

@@ -1,5 +1,25 @@
 #Requires -RunAsAdministrator
 
+param(
+    [string]$DistroUrl=$env:DISTRO_URL,
+    [string]$GitBranch=$env:GIT_BRANCH,
+    [string]$WslName=$env:WSL_NAME,
+    [string]$WslUsername=$env:WSL_USERNAME
+)
+
+if (-not "$GitBranch") {
+    $GitBranch = "unversioned"
+}
+if (-not "$DistroUrl") {
+    $DistroUrl = "https://dl.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-Container-Base.latest.x86_64.tar.xz"
+}
+if (-not "$WslName") {
+    $WslName = "rocky-9"
+}
+if (-not "$WslUsername") {
+    $WslUsername = $env:USERNAME.toLower()
+}
+
 Write-Debug "Check for WSL"
 if ((Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux).State -ne "Enabled") {
     Write-Debug "Enabling WSL"
@@ -8,50 +28,91 @@ if ((Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem
     Write-Information "Restart required.  Please restart, then run this script again"
     exit
 }
-
-Write-Debug "Check for Ubuntu18"
-if (((Get-AppxPackage -Name CanonicalGroupLimited.Ubuntu18.04onWindows).Status -ne "Ok")) {
-    $ProgressPreference = "SilentlyContinue"
-    $ubuntuAppx = "$env:USERPROFILE\Downloads\ubuntu.appx"
-    Write-Information "Downloading ubuntu... This may take a while."
-    Invoke-WebRequest -Uri https://aka.ms/wsl-ubuntu-1804 -OutFile $ubuntuAppx -UseBasicParsing
-
-    Write-Information "Installing ubuntu application"
-    Add-AppxPackage -Path $ubuntuAppx
-
-    Write-Information "Installing ubuntu application"
-    ubuntu1804.exe install --root
+else {
+    Write-Information "Checking for WSL update"
+    wsl --update
 }
 
-Write-Debug "Check if Ubuntu18 needs initialization"
-if ($(ubuntu1804.exe run whoami) -eq "root") {
-    $wslUsername = Read-Host -Prompt 'What is your WSL username (will be created if it does not exist)?'
+Write-Information "Set WSL default version to 2"
+wsl --set-default-version 2
 
-    Write-Information "In passwd  [$(ubuntu1804.exe run "cat /etc/passwd | grep $wslUsername")]"
-    if (-not ((ubuntu1804.exe run "cat /etc/passwd | grep $wslUsername") -match "^$wslUsername`:")) {
-        Write-Information "$wslUsername does not exist...  Creating"
-        ubuntu1804.exe run "adduser $wslUsername"
+Write-Information "Import WSL distribution"
+$console = ([console]::OutputEncoding)
+[console]::OutputEncoding = New-Object System.Text.UnicodeEncoding
+$wslMatcher = (wsl --list --quiet | Select-String -Pattern "(?m)^$WslName$")
+[console]::OutputEncoding = $console
+if (-not $wslMatcher.Matches) {
+    Write-Information "WSL distribution $WslName not yet installed, installing"
+    $distroCache = "$env:LOCALAPPDATA\dev-bootstrap\distrocache"
+    $null = New-Item -Path "$distroCache" -Type Directory -Force
+
+    $wslDir = "$env:LOCALAPPDATA\$WslName"
+    $null = New-Item -Path "$wslDir" -Type Directory -Force
+
+    $distroFile = "$distroCache\$WslName.tar.xz"
+    if (-not (Test-Path -Path "$distroFile" -PathType Leaf)) {
+        Start-BitsTransfer -Source "$DistroUrl" -Destination "$distroFile"
     }
 
-    Write-Information "Add sudo ALL for $wslUsername"
-    ubuntu1804.exe run "echo '$wslUsername ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/$wslUsername"
-    ubuntu1804.exe run "chmod 0440 /etc/sudoers.d/$wslUsername"
+    $wslVolume = "$wslDir\volume"
+    wsl --import "$WslName" "$wslVolume" "$distroFile"
 
-    Write-Information "Setting ubuntu default user to $wslUsername"
-    ubuntu1804.exe config --default-user "$wslUsername"
+    Write-Information "Configure WSL $WslName"
+    wsl --distribution "$WslName" --user root --exec `
+        bash -c "
+            . /etc/os-release
+            if [[ `"`${ID_LIKE}`" =~ rhel ]]; then
+              dnf install --assumeyes systemd
+            fi
+    
+            cat > /etc/wsl.conf <<'EOF'
+[boot]
+systemd=true
+[user]
+default=$WslUsername
+EOF
+            chmod 0644 /etc/wsl.conf
+            "
+    # terminate to satisfy the 8 second rule (may need to switch to shutdown)
+    #   https://learn.microsoft.com/en-us/windows/wsl/wsl-config#the-8-second-rule
+    wsl --terminate "$WslName"
 }
 
-Write-Information "Configuring windows for ansible"
-# https://docs.ansible.com/ansible/latest/user_guide/windows_setup.html#winrm-setup
-$file = "$env:TEMP\ConfigureRemotingForAnsible.ps1"
-Invoke-WebRequest `
-    -Uri "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1" `
-    -UseBasicParsing `
-    -OutFile $file
-powershell.exe -ExecutionPolicy ByPass -File $file
+Write-Information "WSL user $WslUsername"
+wsl --distribution "$WslName" --user root --exec `
+    bash -c "grep '$WslUsername' /etc/passwd"
+if (-not $?) {
+    Write-Information "$WslUsername does not exist, creating..."
+    wsl --distribution "$WslName" --user root --exec `
+        bash -c "
+useradd --create-home '$WslUsername' --shell /bin/bash
+dnf install --assumeyes sudo
+mkdir --parents /etc/sudoers.d
+echo '$WslUsername ALL=(ALL) NOPASSWD:ALL' > '/etc/sudoers.d/$WslUsername'
+chmod 0440 '/etc/sudoers.d/$WslUsername'
+        "
+}
 
-Write-Information "Running dev-bootstrap ansible playbook"
-$script = (Invoke-WebRequest `
-    -Uri "https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/master/bootstrap.sh" `
-    -UseBasicParsing).Content
-ubuntu1804.exe run "$script"
+Write-Information "Setup ansible"
+$configureAnsible = "$env:TEMP\ConfigureRemotingForAnsible.ps1"
+Start-BitsTransfer `
+    -Source "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1" `
+    -Destination "$configureAnsible"
+Write-Information "Running $configureAnsible"
+powershell.exe -NoProfile -ExecutionPolicy ByPass -File "$configureAnsible" -DisableBasicAuth -EnableCredSSP
+winrm set winrm/config/Winrs '@{AllowRemoteShellAccess="true"}'
+Enable-WSManCredSSP -Role Server -Force
+
+if ("$GitBranch" -eq "unversioned") {
+    wsl --distribution "$WslName" --user "$WslUsername" --cd "$PSScriptRoot" --exec `
+        bash -c "GIT_BRANCH=$GitBranch ./bootstrap.sh"
+}
+else {
+    wsl --distribution "$WslName" --user "$WslUsername" --cd "$PSScriptRoot" --exec `
+        bash -c "
+script=`"`$(mktemp)`"
+curl `"https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/$GitBranch/bootstrap.sh`" \
+    --output `"`${script}`"
+GIT_BRANCH='$GitBranch' `"`${script}`"
+            "
+}
