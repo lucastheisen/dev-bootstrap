@@ -4,14 +4,12 @@
     dest: /etc/yum.repos.d/docker-ce.repo
     url: https://download.docker.com/linux/centos/docker-ce.repo
   become: yes
-  become_user: root
 
 - name: Docker packages
   ansible.builtin.dnf:
     name: "{{ dnf_package_list }}"
     state: present
   become: yes
-  become_user: root
 
 - name: Podman packages
   ansible.builtin.dnf:
@@ -21,24 +19,21 @@
     nobest: true
     state: present
   become: yes
-  become_user: root
 
 # need to upgrade because older versions fail to reinstall if they're no longer available
 # reinstall fails if a new shadow-utils has been released, the old patch-level is no longer
 # present in the repository.
 - name: Upgrade shadow-utils to ensure reinstall will succeed
   ansible.builtin.shell: dnf upgrade --assumeyes shadow-utils
-  changed_when: false
   become: yes
-  become_user: root
+  changed_when: false
 
 # need re-install shadow-utils or you get newuidmap permission denied
 #   https://github.com/containers/podman/issues/7749#issuecomment-697557045
 - name: Fix setuid capabilities on newuidmap/newgidmap
   ansible.builtin.shell: dnf reinstall --assumeyes shadow-utils
-  changed_when: false
   become: yes
-  become_user: root
+  changed_when: false
 
 - name: Enable IP forwarding
   ansible.posix.sysctl:
@@ -46,7 +41,6 @@
     value: '1'
     sysctl_set: yes
   become: yes
-  become_user: root
 
 - name: Add user to docker group
   ansible.builtin.user:
@@ -54,7 +48,6 @@
     groups: docker
     append: yes
   become: yes
-  become_user: root
 
 - name: Enable docker systemd service
   ansible.builtin.systemd:
@@ -63,7 +56,6 @@
     enabled: yes
     state: started
   become: yes
-  become_user: root
 
 # We need to create the .kube folder so kubeadm doesn't create
 # it as root when first starting minikube
@@ -80,7 +72,6 @@
     url: "https://github.com/kubernetes/minikube/releases/download/v{{ minikube_version }}/minikube-linux-amd64"
     checksum: "{{ minikube_checksum }}"
   become: yes
-  become_user: root
 
 - name: Install kubectl
   get_url:
@@ -89,7 +80,6 @@
     mode: 0755
     url: "{{ kubectl_url }}"
   become: yes
-  become_user: root
 
 - name: Add containerd ulimit systemd unit override folder
   ansible.builtin.file:
@@ -98,30 +88,29 @@
     mode: '0755'
     group: root
     state: directory
+  become: yes
 
 - name: Files
   ansible.builtin.copy:
     force: yes
     src: "{{ file }}"
     dest: /{{ file }}
+  become: yes
   loop: "{{ files }}"
   loop_control:
     loop_var:  file
-  become: yes
-  become_user: root
 
 - name: Templates
   ansible.builtin.template:
     force: yes
     src: "{{ template }}"
     dest: /{{ file }}
+  become: yes
   loop: "{{ templates }}"
   loop_control:
     loop_var:  template
   vars:
     file: "{{ template | replace('.j2', '') }}"
-  become: yes
-  become_user: root
 
 - name: Enable minikube systemd service
   ansible.builtin.systemd:
@@ -130,4 +119,3 @@
     enabled: yes
     state: started
   become: yes
-  become_user: root
