@@ -136,9 +136,11 @@ else {
     Write-Information "Use remote branch $GitBranch (from $PSScriptRoot)"
     wsl --distribution "$WslName" --user "$WslUsername" --exec `
         bash -c @"
-script="/tmp/dev-bootstrap"
+script="`$(mktemp)"
 curl "https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/$GitBranch/bootstrap.sh" \
     --output "`${script}"
+chmod 0700 "`${script}"
 GIT_BRANCH='$GitBranch' "`${script}"
+rm "`${script}"
 "@
 }
