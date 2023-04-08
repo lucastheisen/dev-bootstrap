@@ -14,3 +14,5 @@
 
   vars: 
     repo_dir: "{{ dev_bootstrap.install_dir }}/external_repos/{{ repo.uri | to_folder_name }}"
+  when:
+  - inventory_hostname == 'localhost'
