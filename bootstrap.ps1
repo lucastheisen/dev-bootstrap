@@ -128,13 +128,13 @@ fi
 
 Write-Information "Switch to bash to complete the bootstrap"
 if ("$GitBranch" -eq "unversioned") {
-    Write-Information "Use local unversioned"
+    Write-Information "Use local unversioned (from $PSScriptRoot)"
     wsl --distribution "$WslName" --user "$WslUsername" --cd "$PSScriptRoot" --exec `
         bash -c "GIT_BRANCH=$GitBranch ./bootstrap.sh"
 }
 else {
-    Write-Information "Use remote branch $GitBranch"
-    wsl --distribution "$WslName" --user "$WslUsername" --cd "$PSScriptRoot" --exec `
+    Write-Information "Use remote branch $GitBranch (from $PSScriptRoot)"
+    wsl --distribution "$WslName" --user "$WslUsername" --exec `
         bash -c @"
 script="/tmp/dev-bootstrap"
 curl "https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/$GitBranch/bootstrap.sh" \
