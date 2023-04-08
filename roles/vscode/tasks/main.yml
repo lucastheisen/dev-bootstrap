@@ -7,3 +7,13 @@
   register: vscode_result
   when:
   - inventory_hostname == 'localwinrm'
+
+- name: Install wget needed by wsl for vscode not installed in EL by default
+  ansible.builtin.dnf:
+    name: wget
+    state: present
+  become: yes
+  when:
+  - inventory_hostname == 'localhost'
+  - ansible_os_family == 'RedHat'
+  - ansible_distribution_major_version == '9'
