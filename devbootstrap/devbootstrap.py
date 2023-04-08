@@ -9,21 +9,6 @@ command_config_edit = dict(
     function=config.edit,
     name='edit')
 
-command_config_set = dict(
-    args=[
-        dict(
-            name='name',
-            description='property name (ex: role.test.foo)',
-            required=True),
-        dict(
-            name='value',
-            description="property value (json string, '' results in delete, '\"\"' results in empty string)",
-            required=True)
-    ],
-    description='set a configuration value',
-    function=config.set_value,
-    name='set')
-
 command_config_view = dict(
     description='prints the current configuration',
     function=config.view,
@@ -32,7 +17,7 @@ command_config_view = dict(
 command_config = dict(
     description='view/modify bootstrap configuration',
     name='config',
-    subcommands=[command_config_edit, command_config_set, command_config_view])
+    subcommands=[command_config_edit, command_config_view])
 
 command_update = dict(
     description='runs bootstrap update',
