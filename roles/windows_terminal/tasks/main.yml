@@ -1,11 +1,12 @@
 ---
 - name: Windows terminal for windows
-  include_tasks: windows.yml
-  vars:
-    ansible_user: "{{ win_ansible_vars.ansible_user }}"
-    ansible_password: "{{ win_ansible_vars.ansible_password }}"
-    ansible_connection: "{{ win_ansible_vars.ansible_connection }}"
-    ansible_winrm_transport: "{{ win_ansible_vars.ansible_winrm_transport }}"
-    ansible_winrm_server_cert_validation: "{{ win_ansible_vars.ansible_winrm_server_cert_validation }}"
+  win_chocolatey:
+    allow_prerelease: "{{ roles.windows_terminal.allow_prerelease | default(true) }}"
+    force: yes
+    name: microsoft-windows-terminal
+    state: "{{ roles.windows_terminal.state | default('latest') }}"
+    version: "{{ roles.windows_terminal.version | default(omit) }}"
   register: windows_terminal_result
+  when:
+  - inventory_hostname == 'localwinrm'
 

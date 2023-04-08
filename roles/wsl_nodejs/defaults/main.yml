@@ -1,4 +1,0 @@
----
-roles_wsl_nodejs_defaults_version: 13.*
-roles_wsl_nodejs_defaults_repo_url: https://deb.nodesource.com/node_{{ roles_wsl_nodejs_defaults_install_version.split('.')[0] }}.x
-roles_wsl_nodejs_defaults_install_version: "{{ roles.wsl_nodejs.version | default(roles_wsl_nodejs_defaults_version) }}"

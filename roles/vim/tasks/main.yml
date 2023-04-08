@@ -1,0 +1,9 @@
+---
+- name: vim for wsl
+  include_tasks: el9.yml
+  register: vim_result_wsl
+  when:
+  - inventory_hostname == 'localhost'
+  - ansible_os_family == 'RedHat'
+  - ansible_distribution_major_version == '9'
+  - "'wsl' in roles.vim.targets"

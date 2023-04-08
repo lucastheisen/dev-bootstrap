@@ -1,11 +1,9 @@
 ---
-- name: WinDirStat for windows (duh!)
-  include_tasks: windows.yml
-  vars:
-    ansible_user: "{{ win_ansible_vars.ansible_user }}"
-    ansible_password: "{{ win_ansible_vars.ansible_password }}"
-    ansible_connection: "{{ win_ansible_vars.ansible_connection }}"
-    ansible_winrm_transport: "{{ win_ansible_vars.ansible_winrm_transport }}"
-    ansible_winrm_server_cert_validation: "{{ win_ansible_vars.ansible_winrm_server_cert_validation }}"
+- name: Install WinDirStat
+  win_chocolatey:
+    name: windirstat
+    state: "{{ roles.windirstat.state | default(omit) }}"
+    version: "{{ roles.windirstat.version | default(omit) }}"
   register: windirstat_result
-
+  when:
+  - inventory_hostname == 'localwinrm'

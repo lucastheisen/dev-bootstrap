@@ -1,4 +1,0 @@
----
-- name: Debug rolevars
-  debug:
-    var: roles.test

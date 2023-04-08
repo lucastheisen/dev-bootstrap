@@ -1,0 +1,39 @@
+---
+- name: Install vim package
+  ansible.builtin.dnf:
+    name: vim-enhanced
+    state: present
+  become: yes
+
+- name: Ensure vim autoload folder exists
+  file:
+    path: "{{ ansible_env['HOME'] }}/.vim/autoload"
+    state: directory
+
+- name: Install vimplug
+  get_url:
+    dest: "{{ ansible_env['HOME'] }}/.vim/autoload/plug.vim"
+    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+- name: Non-local vimrc
+  block:
+
+  - name: Fetch custom vimrc
+    get_url:
+      dest: "{{ ansible_env['HOME'] }}/.vimrc"
+      force: yes
+      url: "{{ roles.vim.vimrc_url }}"
+    when:
+    - roles.vim.vimrc_url is defined
+    notify: "install vim plugins"
+
+  - name: Copy vimrc
+    copy:
+      src: .vimrc
+      dest: "{{ ansible_env['HOME'] }}/.vimrc"
+    when:
+    - roles.vim.vimrc_url is not defined
+    notify: "install vim plugins"
+
+  when:
+  - (roles.vim.vimrc_local is not defined) or (not roles.vim.vimrc_local)

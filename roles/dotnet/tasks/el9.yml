@@ -1,0 +1,7 @@
+---
+- name: Dotnet packages
+  ansible.builtin.dnf:
+    name: dotnet-sdk-{{ wsl_version }}
+    state: present
+  become: yes
+  become_user: root

@@ -1,0 +1,38 @@
+---
+dnf_package_list:
+- containerd.io
+- conntrack
+- docker-ce-{{ dockerd_version }}
+- docker-ce-cli-{{ dockerd_version }}
+- iproute
+
+dockerd_version: 20.10.20
+
+files:
+- etc/docker/daemon.json
+- etc/systemd/system/containerd.service.d/10-ulimit.conf
+
+kubectl_url: https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
+# from https://dl.k8s.io/release/stable.txt
+kubectl_version: v1.25.3
+# obtained with
+#   curl -L https://dl.k8s.io/release/v1.21.1/bin/linux/amd64/kubectl.sha256
+# because `checksum: sha256:<url>` does not appear to follow redirects
+kubectl_checksum: 'sha256:f57e568495c377407485d3eadc27cda25310694ef4ffc480eeea81dea2b60624'
+
+# use version <1.24
+# at 1.24 the dockershim and kubenet were removed and we were unable to
+# get the replacements (cri-dockerd, CNI - calico) to work because for
+# some reason they stopped publishing the ports for ingress in docker.
+# they seem to rely on iptables forwarding which works fine from the
+# WSL side but windows does not route its traffic through that rule so
+# browsers wont send traffic to the cluster.
+kubernetes_version: 1.23.13
+
+minikube_checksum: sha256:159bc79f3914dadb7c9f56b6e9d5b73a1c54acb26dca8f1ea84b99ff5da42620
+minikube_version: 1.27.1
+
+templates:
+- etc/subgid.j2
+- etc/subuid.j2
+- etc/systemd/system/minikube.service.j2

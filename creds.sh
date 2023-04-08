@@ -3,7 +3,7 @@
 set -e
 
 readonly ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-readonly POWERSHELL_DIR="${ROOT_DIR}/vars_plugins/wincreds"
+readonly POWERSHELL_DIR="${ROOT_DIR}/plugins/inventory/localwinrm"
 # shellcheck disable=SC2016
 readonly WIN_PATH_CREDS_JSON='\$env:LOCALAPPDATA/dev-bootstrap/creds.json'
 readonly POWERSHELL='/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'

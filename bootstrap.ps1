@@ -3,10 +3,14 @@
 param(
     [string]$DistroUrl=$env:DISTRO_URL,
     [string]$GitBranch=$env:GIT_BRANCH,
+    [string]$InstallDir=$env:INSTALL_DIR,
     [string]$WslName=$env:WSL_NAME,
     [string]$WslUsername=$env:WSL_USERNAME
 )
 
+if (-not "$InstallDir") {
+    $InstallDir = "${env:LOCALAPPDATA}\dev-bootstrap"
+}
 if (-not "$GitBranch") {
     $GitBranch = "unversioned"
 }
@@ -43,10 +47,10 @@ $wslMatcher = (wsl --list --quiet | Select-String -Pattern "(?m)^$WslName$")
 [console]::OutputEncoding = $console
 if (-not $wslMatcher.Matches) {
     Write-Information "WSL distribution $WslName not yet installed, installing"
-    $distroCache = "$env:LOCALAPPDATA\dev-bootstrap\distrocache"
+    $distroCache = "$InstallDir\distrocache"
     $null = New-Item -Path "$distroCache" -Type Directory -Force
 
-    $wslDir = "$env:LOCALAPPDATA\$WslName"
+    $wslDir = "${env:LOCALAPPDATA}\$WslName"
     $null = New-Item -Path "$wslDir" -Type Directory -Force
 
     $distroFile = "$distroCache\$WslName.tar.xz"
@@ -103,16 +107,36 @@ powershell.exe -NoProfile -ExecutionPolicy ByPass -File "$configureAnsible" -Dis
 winrm set winrm/config/Winrs '@{AllowRemoteShellAccess="true"}'
 Enable-WSManCredSSP -Role Server -Force
 
+Write-Information "Link config inside wsl"
+$wslPathInstallDir = wsl --distribution "$WslName" --exec wslpath "$InstallDir"
+wsl --distribution "$WslName" --user "$WslUsername" --exec bash -c @"
+dir="$wslPathInstallDir"
+
+mkdir --parents "`${dir}"
+config="`${dir}/config.yml"
+if [[ ! -f "`${config}" ]]; then
+  touch "`${config}"
+fi
+
+wsl_config_dir="`${HOME}/.config/dev-bootstrap"
+mkdir --parents "`${wsl_config_dir}"
+wslconfig="`${wsl_config_dir}/config.yml"
+if [[ ! -e "`${wslconfig}" ]]; then
+  ln --symbolic "`${config}" "`${wslconfig}"
+fi
+"@
+
+Write-Information "Switch to bash to complete the bootstrap"
 if ("$GitBranch" -eq "unversioned") {
     wsl --distribution "$WslName" --user "$WslUsername" --cd "$PSScriptRoot" --exec `
         bash -c "GIT_BRANCH=$GitBranch ./bootstrap.sh"
 }
 else {
     wsl --distribution "$WslName" --user "$WslUsername" --cd "$PSScriptRoot" --exec `
-        bash -c "
-script=`"`$(mktemp)`"
-curl `"https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/$GitBranch/bootstrap.sh`" \
-    --output `"`${script}`"
-GIT_BRANCH='$GitBranch' `"`${script}`"
-            "
+        bash -c @"
+script="`$(mktemp)"
+curl "https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/$GitBranch/bootstrap.sh" \
+    --output "`${script}"
+GIT_BRANCH='$GitBranch' "`${script}"
+"@
 }

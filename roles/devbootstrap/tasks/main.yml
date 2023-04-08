@@ -1,6 +1,8 @@
 ---
-- name: Add /etc/profile.d/dev-bootstrap.sh
+- name: Add /etc/profile.d/dev_bootstrap.sh
   template:
-    src: dev-bootstrap.sh
-    dest: /etc/profile.d/dev-bootstrap.sh
+    src: etc/profile.d/dev_bootstrap.sh
+    dest: /etc/profile.d/dev_bootstrap.sh
+  when:
+  - inventory_hostname == 'localhost'
   become: yes

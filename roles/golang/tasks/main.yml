@@ -1,11 +1,16 @@
 ---
 - name: golang for windows
   include_tasks: windows.yml
-  vars:
-    ansible_user: "{{ win_ansible_vars.ansible_user }}"
-    ansible_password: "{{ win_ansible_vars.ansible_password }}"
-    ansible_connection: "{{ win_ansible_vars.ansible_connection }}"
-    ansible_winrm_transport: "{{ win_ansible_vars.ansible_winrm_transport }}"
-    ansible_winrm_server_cert_validation: "{{ win_ansible_vars.ansible_winrm_server_cert_validation }}"
-  register: golang_result
+  register: golang_result_win
+  when:
+  - inventory_hostname == 'localwinrm'
+  - "'win' in roles.golang.targets"
 
+- name: golang for wsl
+  include_tasks: el9.yml
+  register: golang_result_wsl
+  when:
+  - inventory_hostname == 'localhost'
+  - ansible_os_family == 'RedHat'
+  - ansible_distribution_major_version == '9'
+  - "'wsl' in roles.golang.targets"

@@ -1,0 +1,4 @@
+---
+targets: "{{ roles.dotnet.targets | default({}) }}"
+wsl_version: "{{ roles.dotnet.targets.wsl.version | default(dotnet_default_wsl_version) }}"
+win_version: "{{ roles.dotnet.targets.win.version | default(dotnet_default_win_version) }}"

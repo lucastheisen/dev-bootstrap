@@ -1,0 +1,6 @@
+---
+- name: Install nodejs package
+  ansible.builtin.dnf:
+    name: nodejs
+    state: present
+  become: yes

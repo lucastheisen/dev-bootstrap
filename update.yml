@@ -1,16 +1,12 @@
 ---
-- hosts: localhost
+- hosts: localhost,localwinrm
   connection: local
 
-  vars:
-    win_ansible_vars:
-      ansible_user: "{{ wincreds.username }}"
-      ansible_password: "{{ wincreds.password }}"
-      ansible_connection: winrm
-      ansible_winrm_transport: "{{ win_ansible_winrm_transport | default('basic') }}"
-      ansible_winrm_server_cert_validation: ignore
-
   tasks:
+
+  - name: include devbootstrap
+    include_role:
+      name: devbootstrap
 
   - name: set configured roles empty
     set_fact:

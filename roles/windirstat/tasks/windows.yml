@@ -1,6 +1,0 @@
----
-- name: Install WinDirStat
-  win_chocolatey:
-    name: windirstat
-    state: "{{ roles.windirstat.state | default(omit) }}"
-    version: "{{ roles.windirstat.version | default(omit) }}"

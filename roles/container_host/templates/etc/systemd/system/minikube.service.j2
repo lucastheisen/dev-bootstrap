@@ -1,0 +1,31 @@
+[Unit]
+Description=minikube
+After=containerd.service docker.service
+Wants=docker.service cri-docker.service
+Requires=docker.socket containerd.service docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/{{ ansible_user_id }}
+# Either our docker-based source or WSL itself doesn't mount shared, so we need
+# to manually do it.
+# https://github.com/openshift/origin/issues/11314#issuecomment-272723415
+# https://bugzilla.redhat.com/show_bug.cgi?id=1318547#c9
+ExecStartPre=sudo mount --make-rshared /
+ExecStart=/usr/local/bin/minikube start \
+   \
+  --addons=ingress \
+  --apiserver-ips=127.0.0.1 \
+  --apiserver-name=control-plane.minikube.internal \
+  --container-runtime=docker \
+  --driver=none \
+  --embed-certs=true \
+  --keep-context=true \
+  --kubernetes-version=v{{ kubernetes_version }}
+ExecStop=/usr/local/bin/minikube stop
+User={{ ansible_user_id }}
+Group={{ ansible_user_id }}
+
+[Install]
+WantedBy=multi-user.target

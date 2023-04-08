@@ -1,0 +1,9 @@
+---
+- name: Install nodejs
+  include_tasks: el9.yml
+  register: nodejs_result_wsl
+  when:
+  - inventory_hostname == 'localhost'
+  - ansible_os_family == 'RedHat'
+  - ansible_distribution_major_version == '9'
+  - "'wsl' in roles.nodejs.targets"

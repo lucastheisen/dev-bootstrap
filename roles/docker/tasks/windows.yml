@@ -1,7 +1,0 @@
----
-- name: Install docker for windows
-  win_chocolatey:
-    allow_pre_release: "{{ roles.docker.allow_pre_release | default(omit) }}"
-    name: docker-desktop
-    state: "{{ roles.docker.state | default(omit) }}"
-    version: "{{ roles.docker.version | default(omit) }}"

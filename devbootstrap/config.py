@@ -13,21 +13,7 @@ def _config_file():
     if os.name == 'nt':
         config_file = os.path.join(os.environ['LOCALAPPDATA'], 'dev-bootstrap', 'config.yml')
     else: 
-        returncode, localappdata, err = _run_command([
-            'powershell.exe',
-            '-NoProfile',
-            'Write-Output',
-            '$env:LOCALAPPDATA',
-        ])
-        if (returncode):
-            raise Exception("Failed to resolve config file: %s" % (err))
-
-        returncode, config_file, err = _run_command([
-            'wslpath',
-            ('%s/dev-bootstrap/config.yml' % (localappdata)),
-        ])
-        if (returncode):
-            raise Exception("Failed to convert path to WSL: %s" % (err))
+        config_file = os.path.join(os.environ['HOME'], '.config', 'dev-bootstrap', 'config.yml')
 
     return config_file
 
