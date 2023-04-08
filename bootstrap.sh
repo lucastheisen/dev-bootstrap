@@ -66,8 +66,7 @@ function main {
     python3 \
     python3-pip
 
-  initialize_ansible
-
+  log v "download bootstrap"
   if [[ "${GIT_BRANCH}" == "unversioned" ]]; then
     log v "local dev-bootstrap in ${ROOT_DIR}"
     if [[ "${ROOT_DIR}" != "${LIB_DIR}" ]]; then
@@ -85,6 +84,8 @@ function main {
       "https://github.com/lucastheisen/dev-bootstrap/archive/${GIT_BRANCH}.tar.gz" \
       | tar --extract --gunzip --directory "${LIB_DIR}" --strip-components 1
   fi
+
+  initialize_ansible
 
   run_ansible
 }
