@@ -20,12 +20,12 @@ function initialize_ansible {
   fi
 
   . "${VENV_DIR}/bin/activate"
-  log v "installing python dependencies:\n$(sed 's/^/  /' "${ROOT_DIR}/requirements.txt")"
+  log v "installing python dependencies:\n$(sed 's/^/  /' "${LIB_DIR}/requirements.txt")"
   pip install --upgrade pip
-  pip install -r "${ROOT_DIR}/requirements.txt"
+  pip install -r "${LIB_DIR}/requirements.txt"
 
-  log v "installing galaxy collections:\n$(sed 's/^/  /' "${ROOT_DIR}/requirements.yml")"
-  ansible-galaxy collection install --requirements-file "${ROOT_DIR}/requirements.yml"
+  log v "installing galaxy collections:\n$(sed 's/^/  /' "${LIB_DIR}/requirements.yml")"
+  ansible-galaxy collection install --requirements-file "${LIB_DIR}/requirements.yml"
 }
 
 function log {
