@@ -134,7 +134,7 @@ if ("$GitBranch" -eq "unversioned") {
 else {
     wsl --distribution "$WslName" --user "$WslUsername" --cd "$PSScriptRoot" --exec `
         bash -c @"
-script="`$(mktemp)"
+script="/tmp/dev-bootstrap"
 curl "https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/$GitBranch/bootstrap.sh" \
     --output "`${script}"
 GIT_BRANCH='$GitBranch' "`${script}"
