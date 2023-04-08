@@ -132,6 +132,7 @@ if ("$GitBranch" -eq "unversioned") {
         bash -c "GIT_BRANCH=$GitBranch ./bootstrap.sh"
 }
 else {
+    Write-Information "Curl $GitBranch"
     wsl --distribution "$WslName" --user "$WslUsername" --cd "$PSScriptRoot" --exec `
         bash -c @"
 script="/tmp/dev-bootstrap"
