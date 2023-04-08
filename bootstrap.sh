@@ -42,10 +42,8 @@ function log {
 }
 
 function run_ansible {
-  local dir=$1
-
   local cmd=(ansible-playbook update.yml "${ansible_args[@]}")
-  pushd "${dir}" > /dev/null
+  pushd "${LIB_DIR}" > /dev/null
   log v "running: $(printf '%q ' "${cmd[@]}" | sed 's/ $//g')"
   export ANSIBLE_CONFIG
   "${cmd[@]}"
@@ -54,6 +52,7 @@ function run_ansible {
 
 function main {
   local ansible_args=("$@")
+  log v "begin bootstrap for ${GIT_BRANCH}"
 
   mkdir --parents "${BOOTSTRAP_DIR}"
 
@@ -70,12 +69,13 @@ function main {
   initialize_ansible
 
   if [[ "${GIT_BRANCH}" == "unversioned" ]]; then
+    log v "local dev-bootstrap in ${ROOT_DIR}"
     if [[ "${ROOT_DIR}" != "${LIB_DIR}" ]]; then
+      log vv "copy ${ROOT_DIR} to ${LIB_DIR}"
       rm --recursive --force "${LIB_DIR}"
       mkdir --parents "${LIB_DIR}"
       tar --create --directory "${ROOT_DIR}" . | tar --extract --directory "${LIB_DIR}"
     fi
-    run_ansible "${LIB_DIR}"
   else
     log v "fetch dev-bootstrap at ${GIT_BRANCH}"
     rm --recursive --force "${LIB_DIR}"
@@ -84,9 +84,9 @@ function main {
       --location \
       "https://github.com/lucastheisen/dev-bootstrap/archive/${GIT_BRANCH}.tar.gz" \
       | tar --extract --gunzip --directory "${LIB_DIR}" --strip-components 1
-
-    run_ansible "${LIB_DIR}"
   fi
+
+  run_ansible
 }
 
 main "$@"
