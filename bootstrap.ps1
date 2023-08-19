@@ -100,7 +100,7 @@ chmod 0440 '/etc/sudoers.d/$WslUsername'
 Write-Information "Setup ansible"
 $configureAnsible = "$env:TEMP\ConfigureRemotingForAnsible.ps1"
 Start-BitsTransfer `
-    -Source "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1" `
+    -Source "https://raw.githubusercontent.com/ansible/ansible-documentation/devel/examples/scripts/ConfigureRemotingForAnsible.ps1" `
     -Destination "$configureAnsible"
 Write-Information "Running $configureAnsible"
 powershell.exe -NoProfile -ExecutionPolicy ByPass -File "$configureAnsible" -DisableBasicAuth -EnableCredSSP
