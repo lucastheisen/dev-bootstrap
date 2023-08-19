@@ -2,7 +2,13 @@
 Description=minikube
 After=containerd.service docker.service
 Wants=docker.service cri-docker.service
-Requires=docker.socket containerd.service docker.service
+# cant have docker.service in Requires because docker.service gets restarted
+# during the `minikube start` 
+#   https://github.com/kubernetes/minikube/issues/15600#issuecomment-1374773686
+#   https://github.com/kubernetes/minikube/issues/6954#issue-577542972
+# which systemd sees then forces a transitive restart to this service because
+# it depends on docker resulting in an infinite restart loop.
+Requires=docker.socket
 
 [Service]
 Type=oneshot
