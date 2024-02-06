@@ -1,4 +1,4 @@
-ansible-core==2.14.4
+ansible-core==2.15.9
 pywinrm==0.4.3
 pywinrm[credssp]==0.4.3
 requests-credssp==2.0.0
