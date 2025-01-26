@@ -16,6 +16,7 @@ except ImportError:
     display = Display()
 
 LOCALWINRM = {}
+WSL_INTERFACE_ALIAS = 'vEthernet (WSL (Hyper-V firewall))'
 CREDS_JSON = '$env:LOCALAPPDATA/dev-bootstrap/creds.json'
 POWERSHELL = 'powershell.exe'
 
@@ -95,7 +96,7 @@ def save_creds(loader):
 def wsl_ip():
     display.vvv("localwinrm detect WSL ip")
     encoded_command = b64encode(
-        '(Get-NetIPAddress -InterfaceAlias "vEthernet (WSL)" -AddressFamily "IPv4").IPAddress'.encode('utf-16-le'))
+        f'(Get-NetIPAddress -InterfaceAlias "{WSL_INTERFACE_ALIAS}" -AddressFamily "IPv4").IPAddress'.encode('utf-16-le'))
 
     try:
         with open('/dev/null') as f:

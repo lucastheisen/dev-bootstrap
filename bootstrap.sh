@@ -1,5 +1,25 @@
 #!/bin/bash
 
+### Runs bootstrap.
+###
+### Usage:
+###   <Options> ./bootstrap.sh
+###
+### Options:
+###   ANSIBLE_*: any ansible variable will be seen by ansible
+###   GIT_BRANCH: specific branch of bootstrap to use (default: master). A value
+###     of "unversioned" will run the locally checked out code, useful for
+###     debugging
+###
+### Examples:
+###   # run normally
+###   ./bootstrap.sh
+###
+###   # run locally checked out with lots of verbosity
+###   ANSIBLE_VERBOSITY=6 \
+###     GIT_BRANCH=unversioned \
+###     ./bootstrap.sh
+
 set -e
 
 ROOT_DIR="$(dirname "$(readlink --canonicalize-existing "$0")")"
