@@ -37,7 +37,7 @@
     become: yes
 
   when:
-  - roles_golang_current_version.stdout != "go version go" + version + " linux/amd64"
+  - roles_golang_current_version.stdout != "go version go" + wsl_version + " linux/amd64"
   
 - name: Add go bin to path
   copy:
@@ -47,7 +47,7 @@
   become: yes
 #- name: Set wsl_golang_archive
 #  set_fact:
-#    wsl_golang_archive: "go{{ roles.wsl_golang.version | default(wsl_golang_default_version) }}{{ wsl_golang_download_url_extension }}"
+#    wsl_golang_archive: "go{{ roles.wsl_golang.wsl_version | default(wsl_golang_default_version) }}{{ wsl_golang_download_url_extension }}"
 #
 #- name: Set wsl_golang_download_url
 #  set_fact:

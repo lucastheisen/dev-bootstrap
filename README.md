@@ -97,3 +97,11 @@ From a bash shell, run:
 ```bash
 curl https://raw.githubusercontent.com/lucastheisen/dev-bootstrap/master/bootstrap.sh | bash
 ```
+
+## Development
+
+The simplest feedback loop for development is to check out this code and use `bootstrap.sh` with the `unversioned` branch:
+
+```bash
+ANSIBLE_VERBOSITY=6 GIT_BRANCH=unversioned ./bootstrap.sh
+```

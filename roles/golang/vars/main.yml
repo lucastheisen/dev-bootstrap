@@ -1,6 +1,6 @@
 ---
 download_url_base: "https://dl.google.com/go"
-targets: "{{ roles.dotnet.targets | default({}) }}"
-version: "{{ roles.golang.version | default(golang_default_version) }}"
-wsl_archive_name: go{{ version }}.linux-amd64.tar.gz
+targets: "{{ roles.golang.targets | default({}) }}"
+wsl_version: "{{ roles.golang.targets.wsl.version | default(golang_default_version) }}"
+wsl_archive_name: go{{ wsl_version }}.linux-amd64.tar.gz
 wsl_install_dir: /usr/local/go
