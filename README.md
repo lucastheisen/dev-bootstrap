@@ -105,3 +105,29 @@ The simplest feedback loop for development is to check out this code and use `bo
 ```bash
 ANSIBLE_VERBOSITY=6 GIT_BRANCH=unversioned ./bootstrap.sh
 ```
+
+## Known Issues
+
+### Unable to start service minikube
+
+The minikube self-signed certificate that gets generated upon startup expires, and when it does, you get the following error:
+
+```console
+TASK [container_host : Enable minikube systemd service] ***************************************************************************************************************************************************************************************
+fatal: [localhost]: FAILED! => {"changed": false, "msg": "Unable to start service minikube: Job for minikube.service failed because the control process exited with error code.\nSee \"systemctl status minikube.service\" and \"journalctl -xeu minikube.service\" for details.\n"}
+```
+
+You can confirm the error with:
+
+```bash
+journalctl -xeu minikube.service | grep 'the certificate has expired'
+```
+
+When this occur's, the simplest fix is to delete the cluster and re-run the bootstrap:
+
+```bash
+minikube delete
+dev-bootstrap udpate
+```
+
+_Note_, this may result in data loss.
