@@ -15,7 +15,7 @@ if (-not "$GitBranch") {
     $GitBranch = "master"
 }
 if (-not "$DistroUrl") {
-    $DistroUrl = "https://dl.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-Container-Base.latest.x86_64.tar.xz"
+    $DistroUrl = "http://dl.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-WSL-Base.latest.x86_64.wsl"
 }
 if (-not "$WslName") {
     $WslName = "rocky-9"
@@ -53,12 +53,13 @@ if (-not $wslMatcher.Matches) {
     $wslDir = "${env:LOCALAPPDATA}\$WslName"
     $null = New-Item -Path "$wslDir" -Type Directory -Force
 
-    $distroFile = "$distroCache\$WslName.tar.xz"
+    $distroFile = "$distroCache\$WslName.wsl"
     if (-not (Test-Path -Path "$distroFile" -PathType Leaf)) {
         Start-BitsTransfer -Source "$DistroUrl" -Destination "$distroFile"
     }
 
     $wslVolume = "$wslDir\volume"
+    Write-Information "Importing: ``wsl --import `"$WslName`" `"$wslVolume`" `"$distroFile`"``"
     wsl --import "$WslName" "$wslVolume" "$distroFile"
 
     Write-Information "Configure WSL $WslName"
