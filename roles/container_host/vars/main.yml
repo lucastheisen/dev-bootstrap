@@ -6,7 +6,7 @@ dnf_package_list:
 - docker-ce-cli-{{ dockerd_version }}
 - iproute
 
-dockerd_version: 20.10.20
+dockerd_version: 29.7.2
 
 files:
 - etc/docker/daemon.json
